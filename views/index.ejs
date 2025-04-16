@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PhotoShare App</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <h1> PhotoShare App</h1>
+
+  <form action="/upload" method="POST" enctype="multipart/form-data">
+    <input type="file" name="image" required />
+    <button type="submit">Upload</button>
+  </form>
+
+  <h2>Gallery</h2>
+  <div class="gallery">
+    <% images.forEach(function(url) { %>
+      <!-- <img src="<%= url %>" width="200" /> -->
+      <img src="https://<%= bucket %>.s3.amazonaws.com/<%= url %>" width="200" />
+    <% }); %>
+  </div>
+</body>
+</html>
