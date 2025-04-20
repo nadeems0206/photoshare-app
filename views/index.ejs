@@ -1,20 +1,23 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>PhotoShare App</title>
   <link rel="stylesheet" href="/styles1.css">
 </head>
+
 <body>
   <div class="container">
-    <h1><img src="https://cdn-icons-png.flaticon.com/512/685/685655.png" width="40" /> PhotoShare App</h1>
+    <div class="sub-box">
+      <h1><img src="https://cdn-icons-png.freepik.com/256/883/883746.png?semt=ais_hybrid" width="40" /> PhotoShare App</h1>
 
-    <form action="/upload" method="post" enctype="multipart/form-data">
-      <input type="file" name="image" accept="image/*" required />
-      <button type="submit">Upload</button>
-    </form>
+      <form action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="image" accept="image/*" required />
+        <button type="submit">Upload</button>
+      </form>
 
-    <h2><img src="https://cdn-icons-png.flaticon.com/512/847/847969.png" width="30" /> Gallery</h2>
-
+      <h2><img src="https://cdn-icons-png.flaticon.com/512/1375/1375106.png" width="30" /> Gallery</h2>
+    </div>
     <div class="gallery">
       <% images.forEach(function(image) { %>
         <div class="img-card">
@@ -24,8 +27,9 @@
             <button type="submit">Delete</button>
           </form>
         </div>
-      <% }) %>
+        <% }) %>
     </div>
   </div>
 </body>
+
 </html>
