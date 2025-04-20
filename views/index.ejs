@@ -1,32 +1,31 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <title>PhotoShare App</title>
   <link rel="stylesheet" href="/styles1.css">
 </head>
-
 <body>
-  <h1> PhotoShare App</h1>
+  <div class="container">
+    <h1><img src="https://cdn-icons-png.flaticon.com/512/685/685655.png" width="40" /> PhotoShare App</h1>
 
-  <form action="/upload" method="POST" enctype="multipart/form-data">
-    <input type="file" name="image" required />
-    <button type="submit">Upload</button>
-  </form>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+      <input type="file" name="image" accept="image/*" required />
+      <button type="submit">Upload</button>
+    </form>
 
-  <h2>Gallery</h2>
-  <div class="gallery">
-    <% images.forEach(function(url) { %>
-      <img src="https://<%= bucket %>.s3.amazonaws.com/<%= url %>" width="200" />
-      <% }); %>
+    <h2><img src="https://cdn-icons-png.flaticon.com/512/847/847969.png" width="30" /> Gallery</h2>
+
+    <div class="gallery">
+      <% images.forEach(function(image) { %>
+        <div class="img-card">
+          <img src="https://<%= bucket %>.s3.amazonaws.com/<%= image %>" alt="Photo" />
+          <form action="/delete" method="POST">
+            <input type="hidden" name="key" value="<%= image %>">
+            <button type="submit">Delete</button>
+          </form>
+        </div>
+      <% }) %>
+    </div>
   </div>
-
-
-  <footer class="footer">
-    &copy; <%= new Date().getFullYear() %> PhotoShare | Built with ❤️ using AWS
-  </footer>
-
-
 </body>
-
 </html>

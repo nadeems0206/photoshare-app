@@ -6,7 +6,20 @@ const path = require('path');
 
 dotenv.config();
 const app = express();
-const upload = multer();
+
+// Multer config to allow only image uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter: (req, file, cb) => {
+    const filetypes = /jpeg|jpg|png|gif/;
+    const mimetype = filetypes.test(file.mimetype);
+    if (mimetype) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'), false);
+    }
+  }
+});
 
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -19,6 +32,7 @@ const BUCKET = process.env.S3_BUCKET_NAME;
 
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
+app.use(express.urlencoded({ extended: true }));
 
 app.get('/', async (req, res) => {
   try {
@@ -38,7 +52,8 @@ app.post('/upload', upload.single('image'), async (req, res) => {
     Bucket: BUCKET,
     Key: file.originalname,
     Body: file.buffer,
-    ACL: 'public-read'
+    ACL: 'public-read',
+    ContentType: file.mimetype
   };
 
   try {
@@ -46,6 +61,18 @@ app.post('/upload', upload.single('image'), async (req, res) => {
     res.redirect('/');
   } catch (err) {
     res.send("Upload failed.");
+  }
+});
+
+app.post('/delete', async (req, res) => {
+  const { key } = req.body;
+  if (!key) return res.send("No key provided");
+
+  try {
+    await s3.deleteObject({ Bucket: BUCKET, Key: key }).promise();
+    res.redirect('/');
+  } catch (err) {
+    res.send("Deletion failed.");
   }
 });
 
