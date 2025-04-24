@@ -6,20 +6,7 @@ const path = require('path');
 
 dotenv.config();
 const app = express();
-
-// Multer config to allow only image uploads
-const upload = multer({
-  storage: multer.memoryStorage(),
-  fileFilter: (req, file, cb) => {
-    const filetypes = /jpeg|jpg|png|gif/;
-    const mimetype = filetypes.test(file.mimetype);
-    if (mimetype) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed!'), false);
-    }
-  }
-});
+const upload = multer();
 
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -32,7 +19,8 @@ const BUCKET = process.env.S3_BUCKET_NAME;
 
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
-app.use(express.urlencoded({ extended: true }));
+
+const uploadCount = {}; // Store uploads per IP address
 
 app.get('/', async (req, res) => {
   try {
@@ -40,6 +28,7 @@ app.get('/', async (req, res) => {
     const images = data.Contents.map(obj => obj.Key);
     res.render('index', { images, bucket: BUCKET });
   } catch (err) {
+    console.error(err);
     res.send("Error loading images.");
   }
 });
@@ -47,6 +36,22 @@ app.get('/', async (req, res) => {
 app.post('/upload', upload.single('image'), async (req, res) => {
   const file = req.file;
   if (!file) return res.send('No file uploaded.');
+
+  // Get user's IP
+  const userIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+  // Initialize count if IP not seen
+  uploadCount[userIP] = uploadCount[userIP] || 0;
+
+  // Restrict uploads to 2 per IP
+  if (uploadCount[userIP] >= 2) {
+    return res.send("🚫 You can only upload up to 2 images.");
+  }
+
+  // Allow only image files
+  if (!file.mimetype.startsWith('image/')) {
+    return res.send('🚫 Only image files are allowed.');
+  }
 
   const params = {
     Bucket: BUCKET,
@@ -58,22 +63,24 @@ app.post('/upload', upload.single('image'), async (req, res) => {
 
   try {
     await s3.upload(params).promise();
+    uploadCount[userIP]++;
     res.redirect('/');
   } catch (err) {
+    console.error(err);
     res.send("Upload failed.");
   }
 });
 
-app.post('/delete', async (req, res) => {
-  const { key } = req.body;
-  if (!key) return res.send("No key provided");
+app.post('/delete/:key', async (req, res) => {
+  const key = req.params.key;
 
   try {
     await s3.deleteObject({ Bucket: BUCKET, Key: key }).promise();
     res.redirect('/');
   } catch (err) {
-    res.send("Deletion failed.");
+    console.error(err);
+    res.send("Delete failed.");
   }
 });
 
-app.listen(3000, () => console.log("Server started on http://localhost:3000"));
+app.listen(3000, () => console.log(" Server started on http://localhost:3000"));
