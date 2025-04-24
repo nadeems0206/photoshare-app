@@ -71,16 +71,16 @@ app.post('/upload', upload.single('image'), async (req, res) => {
   }
 });
 
-app.post('/delete/:key', async (req, res) => {
-  const key = req.params.key;
+// app.post('/delete/:key', async (req, res) => {
+//   const key = req.params.key;
 
-  try {
-    await s3.deleteObject({ Bucket: BUCKET, Key: key }).promise();
-    res.redirect('/');
-  } catch (err) {
-    console.error(err);
-    res.send("Delete failed.");
-  }
-});
+//   try {
+//     await s3.deleteObject({ Bucket: BUCKET, Key: key }).promise();
+//     res.redirect('/');
+//   } catch (err) {
+//     console.error(err);
+//     res.send("Delete failed.");
+//   }
+// });
 
 app.listen(3000, () => console.log(" Server started on http://localhost:3000"));

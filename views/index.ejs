@@ -24,7 +24,7 @@
           <img src="https://<%= bucket %>.s3.amazonaws.com/<%= image %>" alt="Photo" />
           <form action="/delete" method="POST">
             <input type="hidden" name="key" value="<%= image %>">
-            <button type="submit">Delete</button>
+            <!-- <button type="submit">Delete</button> -->
           </form>
         </div>
         <% }) %>
